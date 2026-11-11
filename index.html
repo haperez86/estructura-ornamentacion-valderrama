@@ -65,7 +65,7 @@
     .empty-state { background:white;border-radius:18px;padding:35px 20px;text-align:center;color:var(--muted); }
     .empty-icon { font-size:36px;margin-bottom:12px; } .empty-state h3 { color:var(--text);margin-bottom:6px;font-size:16px; }
     .empty-state p { font-size:13px;line-height:1.5; }
-    .reset-demo { width:100%;margin-top:16px;padding:13px;border-radius:14px;border:1px dashed #d1d5db;background:transparent;color:var(--muted);font-size:12px; }
+
     .bottom-nav { position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:100%;max-width:540px;background:rgba(255,255,255,.97);border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:9px 8px;z-index:50; }
     .nav-button { border:none;background:none;color:var(--muted);padding:6px 8px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px; }
     .nav-icon { font-size:19px; } .nav-button.active { color:var(--primary-dark);font-weight:750; }
@@ -113,7 +113,6 @@
         <div class="section-header"><h2 class="section-title">Órdenes recientes</h2><button class="section-link" onclick="showScreen('orders')">Ver todas</button></div>
         <div class="list" id="recentOrders"></div>
       </section>
-      <button class="reset-demo" onclick="resetDemo()">🔄 Restablecer datos de demostración</button>
     </main>
   </section>
 
@@ -185,49 +184,8 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  // Datos ficticios: al recargar la página se inicia nuevamente esta demo.
-  const demoData = {
-    orders: [
-      {
-        id: 1, code: "OT-001", client: "Cliente de prueba",
-        description: "Fabricación de una valla metálica",
-        amount: 1300000, deliveryDate: "2026-11-25", delivered: false,
-        payments: [{id: 1, date: "2026-11-02", amount: 1000000}],
-        expenses: [{id: 1, category: "Materiales", description: "Compra de materiales", amount: 250000}]
-      },
-      {
-        id: 2, code: "OT-002", client: "Carlos Rodríguez",
-        description: "Fabricación e instalación de portón metálico",
-        amount: 2500000, deliveryDate: "2026-11-18", delivered: false,
-        payments: [{id: 2, date: "2026-11-05", amount: 1000000}],
-        expenses: [{id: 2, category: "Materiales", description: "Material para fabricación", amount: 800000}]
-      },
-      {
-        id: 3, code: "OT-003", client: "María Gómez",
-        description: "Fabricación e instalación de rejas",
-        amount: 950000, deliveryDate: "2026-12-05", delivered: false,
-        payments: [],
-        expenses: [{id: 3, category: "Materiales", description: "Materiales iniciales", amount: 200000}]
-      }
-    ]
-  };
-
-  // No se consulta localStorage: cada recarga comienza desde los datos de ejemplo.
-  let appData = cloneDemoData();
-
-  function cloneDemoData() {
-    return JSON.parse(JSON.stringify(demoData));
-  }
-
-  function resetDemo() {
-    if (!confirm("¿Deseas restablecer los datos originales de la demostración? Se perderán los cambios de esta sesión.")) return;
-    appData = cloneDemoData();
-    updateDashboard();
-    updateOrdersList();
-    updatePlanner();
-    showScreen("home");
-    showToast("Datos de demostración restablecidos ✓");
-  }
+  // La aplicación comienza vacía. Los registros se crean desde la interfaz.
+  let appData = { orders: [] };
 
   function showScreen(screenId) {
     document.querySelectorAll(".screen").forEach(screen => screen.classList.remove("active"));
@@ -548,7 +506,7 @@
       date.charAt(0).toUpperCase() + date.slice(1);
   }
 
-  // Inicio limpio con los datos ficticios. Los cambios solo viven en esta sesión.
+  // Inicio sin datos precargados. Los cambios solo viven en esta sesión.
   setCurrentDate();
   updateDashboard();
 </script>
