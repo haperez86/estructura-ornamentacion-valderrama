@@ -1,30 +1,33 @@
 # Estructura y Ornamentación Valderrama
 
-Aplicación interactiva mobile-first para gestionar las órdenes de trabajo de un taller de estructuras metálicas.
+Aplicación web mobile-first para administrar las órdenes de trabajo de un pequeño taller de estructuras metálicas.
 
-## Estado inicial
+## Funcionalidades
 
-La aplicación inicia completamente vacía: no incluye clientes, órdenes, abonos ni gastos de ejemplo. Los indicadores comienzan en cero. Registra la primera orden desde el botón **Nueva orden**.
-
-## Funcionalidades incluidas
-
-- Dashboard con utilidad estimada (valor total de trabajos menos gastos).
-- Valor de los trabajos, saldo por cobrar, gastos y órdenes activas.
+- Dashboard con utilidad estimada, valor de trabajos, saldo por cobrar, gastos y órdenes activas.
 - Creación de órdenes con consecutivo automático (OT-001, OT-002...).
-- Registro de abonos por orden, con saldo precargado y validación para no superar el pendiente.
-- Registro de gastos asociados a una orden.
-- Detalle de órdenes con historial de abonos y gastos.
-- Órdenes recientes en el dashboard.
-- Planeador de entregas y alertas por fecha.
+- Registro de abonos vinculados a una orden.
+- Selección del medio de pago de cada abono: Nequi, Daviplata o efectivo.
+- Validación para impedir abonos mayores al saldo pendiente.
+- Registro de gastos por categoría.
+- Detalle de cada orden con historial de abonos y gastos.
+- Marcación de trabajos terminados mediante un check.
+- Exportación de reporte Excel (.xlsx) con cuatro hojas: Resumen, Ordenes, Abonos y Gastos.
+
+## Estado inicial y almacenamiento
+
+La aplicación inicia vacía, sin clientes, órdenes, abonos ni gastos ficticios.
+
+Esta versión es una demo sin backend ni base de datos. Los registros se conservan únicamente durante la sesión actual del navegador. Al recargar o cerrar la página, los datos de esa sesión se pierden.
+
+El reporte Excel descarga los datos disponibles en la sesión actual.
 
 ## Ejecutar localmente
 
-Abre `index.html` directamente en un navegador moderno. No requiere backend ni dependencias.
-
-**Importante:** esta versión es una demo sin persistencia. Los datos que registres estarán disponibles mientras mantengas abierta la página. Al recargarla o cerrarla, se borrarán y la aplicación volverá a iniciar vacía.
+Abre `index.html` en un navegador moderno. No requiere instalación local de dependencias. Para exportar a Excel, se carga SheetJS desde CDN, por lo que se necesita conexión a internet.
 
 ## Publicación
 
 El repositorio se publica con GitHub Pages desde la rama `main`, carpeta `/(root)`.
 
-> Esta es una demo de validación. No es un sistema productivo: no tiene autenticación, servidor ni base de datos compartida entre dispositivos. No ingreses información financiera real o sensible.
+> Esta demo no es un sistema productivo: no tiene autenticación, servidor ni base de datos compartida entre dispositivos. No ingreses información financiera real o sensible.
