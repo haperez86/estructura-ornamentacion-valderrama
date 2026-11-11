@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#111827">
+  <title>Estructura y Ornamentación Valderrama</title>
+  <style>
+    :root {
+      --primary:#f59e0b; --primary-dark:#b45309; --dark:#111827;
+      --background:#f3f4f6; --white:#fff; --text:#1f2937;
+      --muted:#6b7280; --border:#e5e7eb; --success:#059669;
+      --danger:#dc2626; --warning:#d97706; --shadow:0 10px 30px rgba(0,0,0,.08);
+    }
+    * { box-sizing:border-box; margin:0; padding:0; font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    body { background:var(--background); color:var(--text); padding-bottom:88px; }
+    button,input,textarea,select { font:inherit; } button { cursor:pointer; }
+    .app { max-width:540px; min-height:100vh; margin:0 auto; background:var(--background); }
+    .screen { display:none; animation:fade .2s ease; } .screen.active { display:block; }
+    @keyframes fade { from {opacity:0;transform:translateY(6px)} to {opacity:1;transform:translateY(0)} }
+    .app-header { background:linear-gradient(135deg,#111827,#293548); color:white; padding:26px 20px 45px; border-radius:0 0 30px 30px; }
+    .brand { display:flex; align-items:center; gap:12px; }
+    .brand-icon { width:50px;height:50px;border-radius:15px;display:grid;place-items:center;font-size:25px;background:linear-gradient(135deg,var(--primary),var(--primary-dark)); }
+    .brand h1 { font-size:18px;line-height:1.2; } .brand p { margin-top:4px;font-size:12px;color:#d1d5db; }
+    .header-date { margin-top:25px;color:#9ca3af;font-size:13px;text-transform:capitalize; }
+    .header-title { font-size:23px; } .header-subtitle { margin-top:6px;color:#d1d5db;font-size:14px;line-height:1.4; }
+    .content { padding:0 18px 28px; }
+    .profit-card { background:white;border-radius:22px;padding:20px;margin-top:-23px;box-shadow:var(--shadow); }
+    .profit-label { color:var(--muted);font-size:13px; } .profit-value { margin-top:7px;font-size:30px;font-weight:800;color:var(--success); }
+    .profit-description { margin-top:7px;color:var(--muted);font-size:12px; }
+    .summary-grid { display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px; }
+    .summary-card { background:white;border-radius:18px;padding:16px;box-shadow:0 4px 15px rgba(0,0,0,.04); }
+    .summary-icon { font-size:21px; } .summary-label { margin-top:8px;font-size:12px;color:var(--muted); }
+    .summary-value { margin-top:5px;font-size:17px;font-weight:750; }
+    .income-color { color:var(--success); } .expense-color { color:var(--danger); } .pending-color { color:var(--warning); }
+    .section { margin-top:28px; } .section-header { display:flex;justify-content:space-between;align-items:center;margin-bottom:13px; }
+    .section-title { font-size:17px;font-weight:750; }
+    .section-link { border:none;background:none;color:var(--primary-dark);font-size:13px;font-weight:700; }
+    .quick-actions { display:grid;grid-template-columns:repeat(3,1fr);gap:10px; }
+    .action-button { border:none;background:white;border-radius:17px;padding:16px 7px;box-shadow:0 4px 15px rgba(0,0,0,.04);display:flex;flex-direction:column;align-items:center;gap:8px;font-size:11px;font-weight:700;color:var(--text); }
+    .action-icon { width:43px;height:43px;border-radius:13px;display:grid;place-items:center;font-size:20px; }
+    .work-bg { background:#fffbeb; } .payment-bg { background:#ecfdf5; } .expense-bg { background:#fef2f2; }
+    .list { background:white;border-radius:18px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,.03); }
+    .list-item { padding:15px;border-bottom:1px solid var(--border);cursor:pointer; }
+    .list-item:last-child { border-bottom:none; }
+    .list-row { display:flex;justify-content:space-between;gap:12px;align-items:flex-start; }
+    .item-title { font-size:14px;font-weight:750; } .item-detail { margin-top:4px;font-size:12px;color:var(--muted);line-height:1.4; }
+    .item-value { white-space:nowrap;font-size:14px;font-weight:750; }
+    .order-code { display:inline-block;background:#fffbeb;color:var(--primary-dark);padding:4px 8px;border-radius:8px;font-size:11px;font-weight:800;margin-bottom:6px; }
+    .delivery-status { display:inline-block;padding:4px 8px;border-radius:8px;font-size:11px;font-weight:700;margin-top:8px;white-space:nowrap; }
+    .status-overdue { color:var(--danger);background:#fef2f2; } .status-soon { color:var(--warning);background:#fffbeb; } .status-ok { color:var(--success);background:#ecfdf5; }
+    .back-button { background:none;color:white;border:none;margin-bottom:18px;padding:0;font-size:14px; }
+    .form-container,.detail-card { background:white;margin-top:-18px;border-radius:22px;padding:20px;box-shadow:var(--shadow); }
+    .form-group { margin-bottom:18px; } label { display:block;margin-bottom:8px;font-size:13px;font-weight:700; }
+    input,textarea,select { width:100%;border:1px solid var(--border);border-radius:13px;padding:14px;background:#fafafa;outline:none; }
+    input:focus,textarea:focus,select:focus { background:white;border-color:var(--primary);box-shadow:0 0 0 3px rgba(245,158,11,.12); }
+    textarea { min-height:90px;resize:vertical; } .help { margin-top:6px;font-size:11px;color:var(--muted); }
+    .balance-info { background:#fffbeb;color:var(--primary-dark);border-radius:13px;padding:12px;margin-bottom:18px;font-size:13px;font-weight:700; }
+    .primary-button,.danger-button { width:100%;padding:16px;border-radius:15px;font-weight:750;font-size:15px;border:none; }
+    .primary-button { color:white;background:linear-gradient(135deg,var(--primary),var(--primary-dark)); }
+    .danger-button { background:#fef2f2;color:var(--danger);border:1px solid #fecaca; }
+    .detail-row { display:flex;justify-content:space-between;gap:15px;padding:13px 0;border-bottom:1px solid var(--border);font-size:14px; }
+    .detail-label { color:var(--muted); } .detail-value { font-weight:750;text-align:right; }
+    .history { margin-top:25px; } .history h3 { font-size:16px;margin-bottom:10px; }
+    .empty-state { background:white;border-radius:18px;padding:35px 20px;text-align:center;color:var(--muted); }
+    .empty-icon { font-size:36px;margin-bottom:12px; } .empty-state h3 { color:var(--text);margin-bottom:6px;font-size:16px; }
+    .empty-state p { font-size:13px;line-height:1.5; }
+    .reset-demo { width:100%;margin-top:16px;padding:13px;border-radius:14px;border:1px dashed #d1d5db;background:transparent;color:var(--muted);font-size:12px; }
+    .bottom-nav { position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:100%;max-width:540px;background:rgba(255,255,255,.97);border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:9px 8px;z-index:50; }
+    .nav-button { border:none;background:none;color:var(--muted);padding:6px 8px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px; }
+    .nav-icon { font-size:19px; } .nav-button.active { color:var(--primary-dark);font-weight:750; }
+    .toast { position:fixed;left:50%;bottom:88px;transform:translateX(-50%) translateY(20px);width:calc(100% - 40px);max-width:420px;padding:14px 18px;border-radius:14px;background:var(--dark);color:white;text-align:center;font-size:13px;opacity:0;pointer-events:none;transition:.25s ease;z-index:100; }
+    .toast.show { opacity:1;transform:translateX(-50%) translateY(0); }
+    .detail-actions { margin-top:20px;display:grid;gap:10px; }
+    @media (min-width:700px) { body { padding-top:20px; } .app { min-height:calc(100vh - 20px);box-shadow:var(--shadow);border-radius:24px 24px 0 0;overflow:hidden; } }
+  </style>
+</head>
+<body>
+<div class="app">
+  <section id="home" class="screen active">
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-icon">🏗️</div>
+        <div><h1>Estructura y Ornamentación Valderrama</h1><p>Control sencillo de tus trabajos</p></div>
+      </div>
+      <div class="header-date" id="currentDate"></div>
+    </header>
+    <main class="content">
+      <div class="profit-card">
+        <div class="profit-label">Utilidad estimada del negocio</div>
+        <div class="profit-value" id="estimatedProfit">$0</div>
+        <div class="profit-description">Valor total de los trabajos menos los gastos registrados.</div>
+      </div>
+      <div class="summary-grid">
+        <div class="summary-card"><div class="summary-icon">🏗️</div><div class="summary-label">Valor de los trabajos</div><div class="summary-value income-color" id="totalWorkValue">$0</div></div>
+        <div class="summary-card"><div class="summary-icon">⏳</div><div class="summary-label">Saldo por cobrar</div><div class="summary-value pending-color" id="pendingAmount">$0</div></div>
+        <div class="summary-card"><div class="summary-icon">💸</div><div class="summary-label">Gastos</div><div class="summary-value expense-color" id="totalExpense">$0</div></div>
+        <div class="summary-card"><div class="summary-icon">📋</div><div class="summary-label">Órdenes activas</div><div class="summary-value" id="orderCount">0</div></div>
+      </div>
+      <section class="section">
+        <div class="section-header"><h2 class="section-title">Acciones rápidas</h2></div>
+        <div class="quick-actions">
+          <button class="action-button" onclick="showScreen('newOrder')"><span class="action-icon work-bg">🏗️</span>Nueva orden</button>
+          <button class="action-button" onclick="openPaymentScreen()"><span class="action-icon payment-bg">💵</span>Registrar abono</button>
+          <button class="action-button" onclick="openExpenseScreen()"><span class="action-icon expense-bg">💸</span>Registrar gasto</button>
+        </div>
+      </section>
+      <section class="section">
+        <div class="section-header"><h2 class="section-title">Próximas entregas</h2><button class="section-link" onclick="showScreen('planner')">Ver planeador</button></div>
+        <div class="list" id="upcomingDeliveries"></div>
+      </section>
+      <section class="section">
+        <div class="section-header"><h2 class="section-title">Órdenes recientes</h2><button class="section-link" onclick="showScreen('orders')">Ver todas</button></div>
+        <div class="list" id="recentOrders"></div>
+      </section>
+      <button class="reset-demo" onclick="resetDemo()">🔄 Restablecer datos de demostración</button>
+    </main>
+  </section>
+
+  <section id="newOrder" class="screen">
+    <header class="app-header">
+      <button class="back-button" onclick="showScreen('home')">← Volver</button>
+      <h1 class="header-title">Nueva orden de trabajo</h1>
+      <p class="header-subtitle">Se generará automáticamente el número de la orden.</p>
+    </header>
+    <main class="content">
+      <form class="form-container" id="orderForm">
+        <div class="form-group"><label for="orderClient">Cliente</label><input id="orderClient" type="text" placeholder="Ej: Juan Pérez" required></div>
+        <div class="form-group"><label for="orderDescription">Descripción del trabajo</label><textarea id="orderDescription" placeholder="Ej: Fabricación e instalación de un portón metálico" required></textarea></div>
+        <div class="form-group"><label for="orderAmount">Valor total del trabajo</label><input id="orderAmount" type="number" min="1" inputmode="numeric" placeholder="Ej: 1300000" required></div>
+        <div class="form-group"><label for="deliveryDate">Fecha estimada de entrega</label><input id="deliveryDate" type="date" required><div class="help">Esta fecha aparecerá en el planeador de entregas.</div></div>
+        <button type="submit" class="primary-button">Crear orden de trabajo</button>
+      </form>
+    </main>
+  </section>
+
+  <section id="orders" class="screen">
+    <header class="app-header"><button class="back-button" onclick="showScreen('home')">← Volver</button><h1 class="header-title">Órdenes de trabajo</h1><p class="header-subtitle">Consulta el estado y detalle de cada trabajo.</p></header>
+    <main class="content"><section class="section"><div class="list" id="ordersList"></div></section></main>
+  </section>
+
+  <section id="orderDetail" class="screen">
+    <header class="app-header"><button class="back-button" onclick="showScreen('orders')">← Órdenes</button><div id="orderDetailHeader"></div></header>
+    <main class="content"><div class="detail-card" id="orderDetailContent"></div></main>
+  </section>
+
+  <section id="payment" class="screen">
+    <header class="app-header"><button class="back-button" onclick="showScreen('home')">← Volver</button><h1 class="header-title">Registrar abono</h1><p class="header-subtitle">Registra un pago recibido de un cliente.</p></header>
+    <main class="content">
+      <form class="form-container" id="paymentForm">
+        <div class="form-group"><label for="paymentOrder">Orden de trabajo</label><select id="paymentOrder" required onchange="updatePaymentBalance()"></select></div>
+        <div class="balance-info" id="paymentBalanceInfo">Saldo pendiente: $0</div>
+        <div class="form-group"><label for="paymentDate">Fecha del abono</label><input id="paymentDate" type="date" required></div>
+        <div class="form-group"><label for="paymentAmount">Valor del abono</label><input id="paymentAmount" type="number" min="1" required><div class="help">Se carga automáticamente el saldo pendiente, pero puedes modificarlo.</div></div>
+        <button type="submit" class="primary-button">Registrar abono</button>
+      </form>
+    </main>
+  </section>
+
+  <section id="expense" class="screen">
+    <header class="app-header"><button class="back-button" onclick="showScreen('home')">← Volver</button><h1 class="header-title">Registrar gasto</h1><p class="header-subtitle">Registra los gastos relacionados con tus trabajos.</p></header>
+    <main class="content">
+      <form class="form-container" id="expenseForm">
+        <div class="form-group"><label for="expenseOrder">Orden de trabajo</label><select id="expenseOrder" required></select></div>
+        <div class="form-group"><label for="expenseCategory">Categoría</label><select id="expenseCategory"><option>Materiales</option><option>Transporte</option><option>Mano de obra</option><option>Herramientas</option><option>Otro</option></select></div>
+        <div class="form-group"><label for="expenseDescription">Descripción</label><input id="expenseDescription" type="text" placeholder="Ej: Compra de materiales" required></div>
+        <div class="form-group"><label for="expenseAmount">Valor del gasto</label><input id="expenseAmount" type="number" min="1" inputmode="numeric" placeholder="Ej: 250000" required></div>
+        <button type="submit" class="danger-button">Registrar gasto</button>
+      </form>
+    </main>
+  </section>
+
+  <section id="planner" class="screen">
+    <header class="app-header"><button class="back-button" onclick="showScreen('home')">← Volver</button><h1 class="header-title">Planeador de entregas</h1><p class="header-subtitle">Organiza tus trabajos según su fecha de entrega.</p></header>
+    <main class="content"><section class="section"><div class="list" id="plannerList"></div></section></main>
+  </section>
+</div>
+
+<nav class="bottom-nav">
+  <button class="nav-button active" data-screen="home" onclick="showScreen('home')"><span class="nav-icon">⌂</span>Inicio</button>
+  <button class="nav-button" data-screen="newOrder" onclick="showScreen('newOrder')"><span class="nav-icon">＋</span>Nueva orden</button>
+  <button class="nav-button" data-screen="orders" onclick="showScreen('orders')"><span class="nav-icon">☷</span>Órdenes</button>
+  <button class="nav-button" data-screen="planner" onclick="showScreen('planner')"><span class="nav-icon">📅</span>Planeador</button>
+</nav>
+<div class="toast" id="toast"></div>
+
+<script>
+  // Datos ficticios: al recargar la página se inicia nuevamente esta demo.
+  const demoData = {
+    orders: [
+      {
+        id: 1, code: "OT-001", client: "Cliente de prueba",
+        description: "Fabricación de una valla metálica",
+        amount: 1300000, deliveryDate: "2026-11-25", delivered: false,
+        payments: [{id: 1, date: "2026-11-02", amount: 1000000}],
+        expenses: [{id: 1, category: "Materiales", description: "Compra de materiales", amount: 250000}]
+      },
+      {
+        id: 2, code: "OT-002", client: "Carlos Rodríguez",
+        description: "Fabricación e instalación de portón metálico",
+        amount: 2500000, deliveryDate: "2026-11-18", delivered: false,
+        payments: [{id: 2, date: "2026-11-05", amount: 1000000}],
+        expenses: [{id: 2, category: "Materiales", description: "Material para fabricación", amount: 800000}]
+      },
+      {
+        id: 3, code: "OT-003", client: "María Gómez",
+        description: "Fabricación e instalación de rejas",
+        amount: 950000, deliveryDate: "2026-12-05", delivered: false,
+        payments: [],
+        expenses: [{id: 3, category: "Materiales", description: "Materiales iniciales", amount: 200000}]
+      }
+    ]
+  };
+
+  // No se consulta localStorage: cada recarga comienza desde los datos de ejemplo.
+  let appData = cloneDemoData();
+
+  function cloneDemoData() {
+    return JSON.parse(JSON.stringify(demoData));
+  }
+
+  function resetDemo() {
+    if (!confirm("¿Deseas restablecer los datos originales de la demostración? Se perderán los cambios de esta sesión.")) return;
+    appData = cloneDemoData();
+    updateDashboard();
+    updateOrdersList();
+    updatePlanner();
+    showScreen("home");
+    showToast("Datos de demostración restablecidos ✓");
+  }
+
+  function showScreen(screenId) {
+    document.querySelectorAll(".screen").forEach(screen => screen.classList.remove("active"));
+    document.getElementById(screenId).classList.add("active");
+    document.querySelectorAll(".nav-button").forEach(button => {
+      button.classList.toggle("active", button.dataset.screen === screenId);
+    });
+    updateDashboard();
+    if (screenId === "orders") updateOrdersList();
+    if (screenId === "planner") updatePlanner();
+    window.scrollTo({top: 0, behavior: "smooth"});
+  }
+
+  function formatCurrency(value) {
+    return new Intl.NumberFormat("es-CO", {
+      style: "currency", currency: "COP", maximumFractionDigits: 0
+    }).format(value);
+  }
+
+  function formatDate(dateString) {
+    if (!dateString) return "Sin fecha";
+    return new Intl.DateTimeFormat("es-CO", {
+      day: "numeric", month: "long", year: "numeric"
+    }).format(new Date(dateString + "T12:00:00"));
+  }
+
+  function escapeHTML(text) {
+    const div = document.createElement("div");
+    div.textContent = String(text ?? "");
+    return div.innerHTML;
+  }
+
+  function getOrderPayments(order) {
+    return order.payments.reduce((total, payment) => total + payment.amount, 0);
+  }
+
+  function getOrderExpenses(order) {
+    return order.expenses.reduce((total, expense) => total + expense.amount, 0);
+  }
+
+  function getOrderBalance(order) {
+    return Math.max(0, order.amount - getOrderPayments(order));
+  }
+
+  function getSummary() {
+    let workValue = 0;
+    let expenses = 0;
+    let pending = 0;
+    appData.orders.forEach(order => {
+      workValue += order.amount;
+      expenses += getOrderExpenses(order);
+      pending += getOrderBalance(order);
+    });
+    return {
+      workValue, expenses, pending,
+      profit: workValue - expenses,
+      orders: appData.orders.filter(order => !order.delivered).length
+    };
+  }
+
+  function updateDashboard() {
+    const summary = getSummary();
+    document.getElementById("estimatedProfit").textContent = formatCurrency(summary.profit);
+    document.getElementById("totalWorkValue").textContent = formatCurrency(summary.workValue);
+    document.getElementById("pendingAmount").textContent = formatCurrency(summary.pending);
+    document.getElementById("totalExpense").textContent = formatCurrency(summary.expenses);
+    document.getElementById("orderCount").textContent = summary.orders;
+    updateRecentOrders();
+    updateUpcomingDeliveries();
+  }
+
+  function getDeliveryStatus(order) {
+    if (order.delivered) return {label: "✓ Entregado", className: "status-ok"};
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const delivery = new Date(order.deliveryDate + "T12:00:00");
+    const difference = Math.ceil((delivery - today) / 86400000);
+    if (difference < 0) return {label: "⚠ Entrega vencida", className: "status-overdue"};
+    if (difference <= 7) return {label: "📅 Entrega próxima", className: "status-soon"};
+    return {label: "✓ En planeación", className: "status-ok"};
+  }
+
+  function createOrderHTML(order) {
+    const paid = getOrderPayments(order);
+    const balance = getOrderBalance(order);
+    const status = getDeliveryStatus(order);
+    return `
+      <div class="list-item" onclick="openOrderDetail(${order.id})">
+        <span class="order-code">${escapeHTML(order.code)}</span>
+        <div class="list-row">
+          <div>
+            <div class="item-title">${escapeHTML(order.description)}</div>
+            <div class="item-detail">Cliente: ${escapeHTML(order.client)}</div>
+            <div class="item-detail">📅 Entrega: ${formatDate(order.deliveryDate)}</div>
+          </div>
+          <div class="item-value">${formatCurrency(order.amount)}</div>
+        </div>
+        <div class="item-detail">Abonos: ${formatCurrency(paid)} · Saldo: ${formatCurrency(balance)}</div>
+        <div class="delivery-status ${status.className}">${status.label}</div>
+      </div>`;
+  }
+
+  function updateRecentOrders() {
+    const container = document.getElementById("recentOrders");
+    const orders = [...appData.orders].sort((a,b) => b.id-a.id).slice(0,4);
+    container.innerHTML = orders.length
+      ? orders.map(createOrderHTML).join("")
+      : `<div class="empty-state"><div class="empty-icon">🏗️</div><h3>Aún no hay órdenes</h3><p>Crea tu primera orden de trabajo.</p></div>`;
+  }
+
+  function updateOrdersList() {
+    const container = document.getElementById("ordersList");
+    container.innerHTML = appData.orders.length
+      ? appData.orders.map(createOrderHTML).join("")
+      : `<div class="empty-state"><div class="empty-icon">📋</div><h3>No hay órdenes</h3><p>Registra una nueva orden.</p></div>`;
+  }
+
+  document.getElementById("orderForm").addEventListener("submit", function(event) {
+    event.preventDefault();
+    const highestNumber = appData.orders.reduce((max, order) => {
+      return Math.max(max, Number(order.code.replace("OT-", "")));
+    }, 0);
+    const order = {
+      id: Date.now(),
+      code: "OT-" + String(highestNumber + 1).padStart(3, "0"),
+      client: document.getElementById("orderClient").value.trim(),
+      description: document.getElementById("orderDescription").value.trim(),
+      amount: Number(document.getElementById("orderAmount").value),
+      deliveryDate: document.getElementById("deliveryDate").value,
+      delivered: false,
+      payments: [],
+      expenses: []
+    };
+    appData.orders.unshift(order);
+    this.reset();
+    updateDashboard();
+    showScreen("orders");
+    showToast("Orden " + order.code + " creada correctamente ✓");
+  });
+
+  function openPaymentScreen() {
+    const orders = appData.orders.filter(order => getOrderBalance(order) > 0);
+    if (!orders.length) {
+      showToast("No hay órdenes con saldo pendiente");
+      return;
+    }
+    const select = document.getElementById("paymentOrder");
+    select.innerHTML = orders.map(order =>
+      `<option value="${order.id}">${escapeHTML(order.code)} - ${escapeHTML(order.client)}</option>`
+    ).join("");
+    document.getElementById("paymentDate").value = new Date().toISOString().split("T")[0];
+    updatePaymentBalance();
+    showScreen("payment");
+  }
+
+  function updatePaymentBalance() {
+    const orderId = Number(document.getElementById("paymentOrder").value);
+    const order = appData.orders.find(item => item.id === orderId);
+    if (!order) return;
+    const balance = getOrderBalance(order);
+    document.getElementById("paymentBalanceInfo").textContent = "Saldo pendiente: " + formatCurrency(balance);
+    const amountInput = document.getElementById("paymentAmount");
+    amountInput.value = balance;
+    amountInput.max = balance;
+  }
+
+  document.getElementById("paymentForm").addEventListener("submit", function(event) {
+    event.preventDefault();
+    const order = appData.orders.find(item => item.id === Number(document.getElementById("paymentOrder").value));
+    if (!order) return;
+    const amount = Number(document.getElementById("paymentAmount").value);
+    const balance = getOrderBalance(order);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      showToast("El valor del abono debe ser mayor a cero");
+      return;
+    }
+    if (amount > balance) {
+      showToast("El abono no puede superar el saldo de " + formatCurrency(balance));
+      document.getElementById("paymentAmount").value = balance;
+      return;
+    }
+    order.payments.push({
+      id: Date.now(),
+      date: document.getElementById("paymentDate").value,
+      amount
+    });
+    this.reset();
+    updateDashboard();
+    showScreen("home");
+    showToast("Abono registrado correctamente ✓");
+  });
+
+  function openExpenseScreen() {
+    if (!appData.orders.length) {
+      showToast("Primero debes crear una orden");
+      return;
+    }
+    const select = document.getElementById("expenseOrder");
+    select.innerHTML = appData.orders.map(order =>
+      `<option value="${order.id}">${escapeHTML(order.code)} - ${escapeHTML(order.client)}</option>`
+    ).join("");
+    showScreen("expense");
+  }
+
+  document.getElementById("expenseForm").addEventListener("submit", function(event) {
+    event.preventDefault();
+    const order = appData.orders.find(item => item.id === Number(document.getElementById("expenseOrder").value));
+    if (!order) return;
+    const amount = Number(document.getElementById("expenseAmount").value);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      showToast("El gasto debe ser mayor a cero");
+      return;
+    }
+    order.expenses.push({
+      id: Date.now(),
+      category: document.getElementById("expenseCategory").value,
+      description: document.getElementById("expenseDescription").value.trim(),
+      amount
+    });
+    this.reset();
+    updateDashboard();
+    showScreen("home");
+    showToast("Gasto registrado correctamente ✓");
+  });
+
+  function openOrderDetail(orderId) {
+    const order = appData.orders.find(item => item.id === orderId);
+    if (!order) return;
+    const paid = getOrderPayments(order);
+    const expenses = getOrderExpenses(order);
+    const balance = getOrderBalance(order);
+    document.getElementById("orderDetailHeader").innerHTML = `
+      <span class="order-code">${escapeHTML(order.code)}</span>
+      <h1 class="header-title">${escapeHTML(order.client)}</h1>
+      <p class="header-subtitle">${escapeHTML(order.description)}</p>`;
+    const paymentsHTML = order.payments.length
+      ? order.payments.map(payment => `
+        <div class="detail-row"><span class="detail-label">${formatDate(payment.date)}</span><span class="detail-value income-color">${formatCurrency(payment.amount)}</span></div>`).join("")
+      : `<div class="item-detail">Aún no hay abonos registrados.</div>`;
+    const expensesHTML = order.expenses.length
+      ? order.expenses.map(expense => `
+        <div class="detail-row"><span class="detail-label">${escapeHTML(expense.description)}</span><span class="detail-value expense-color">${formatCurrency(expense.amount)}</span></div>`).join("")
+      : `<div class="item-detail">Aún no hay gastos registrados.</div>`;
+    document.getElementById("orderDetailContent").innerHTML = `
+      <div class="detail-row"><span class="detail-label">Valor total del trabajo</span><span class="detail-value">${formatCurrency(order.amount)}</span></div>
+      <div class="detail-row"><span class="detail-label">Abonos recibidos</span><span class="detail-value income-color">${formatCurrency(paid)}</span></div>
+      <div class="detail-row"><span class="detail-label">Saldo por cobrar</span><span class="detail-value pending-color">${formatCurrency(balance)}</span></div>
+      <div class="detail-row"><span class="detail-label">Gastos registrados</span><span class="detail-value expense-color">${formatCurrency(expenses)}</span></div>
+      <div class="detail-row"><span class="detail-label">Fecha estimada de entrega</span><span class="detail-value">${formatDate(order.deliveryDate)}</span></div>
+      <div class="history"><h3>💵 Historial de abonos</h3>${paymentsHTML}</div>
+      <div class="history"><h3>💸 Gastos del trabajo</h3>${expensesHTML}</div>`;
+    showScreen("orderDetail");
+  }
+
+  function updateUpcomingDeliveries() {
+    const container = document.getElementById("upcomingDeliveries");
+    const orders = [...appData.orders]
+      .filter(order => !order.delivered)
+      .sort((a,b) => new Date(a.deliveryDate)-new Date(b.deliveryDate))
+      .slice(0,3);
+    if (!orders.length) {
+      container.innerHTML = `<div class="empty-state"><div class="empty-icon">📅</div><h3>No hay entregas pendientes</h3><p>Las próximas fechas aparecerán aquí.</p></div>`;
+      return;
+    }
+    container.innerHTML = orders.map(order => {
+      const status = getDeliveryStatus(order);
+      return `
+        <div class="list-item" onclick="openOrderDetail(${order.id})">
+          <span class="order-code">${escapeHTML(order.code)}</span>
+          <div class="list-row">
+            <div>
+              <div class="item-title">${escapeHTML(order.client)}</div>
+              <div class="item-detail">📅 Entrega: ${formatDate(order.deliveryDate)}</div>
+              <div class="item-detail">${escapeHTML(order.description)}</div>
+            </div>
+            <div class="delivery-status ${status.className}">${status.label}</div>
+          </div>
+        </div>`;
+    }).join("");
+  }
+
+  function updatePlanner() {
+    const container = document.getElementById("plannerList");
+    const orders = [...appData.orders].sort((a,b) => new Date(a.deliveryDate)-new Date(b.deliveryDate));
+    if (!orders.length) {
+      container.innerHTML = `<div class="empty-state"><div class="empty-icon">📅</div><h3>No hay trabajos programados</h3><p>Agrega una fecha de entrega a una nueva orden.</p></div>`;
+      return;
+    }
+    container.innerHTML = orders.map(order => {
+      const status = getDeliveryStatus(order);
+      return `
+        <div class="list-item" onclick="openOrderDetail(${order.id})">
+          <span class="order-code">${escapeHTML(order.code)}</span>
+          <div class="list-row">
+            <div>
+              <div class="item-title">${escapeHTML(order.client)}</div>
+              <div class="item-detail">${escapeHTML(order.description)}</div>
+              <div class="item-detail">📅 ${formatDate(order.deliveryDate)}</div>
+            </div>
+            <div class="delivery-status ${status.className}">${status.label}</div>
+          </div>
+        </div>`;
+    }).join("");
+  }
+
+  function showToast(message) {
+    const toast = document.getElementById("toast");
+    toast.textContent = message;
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 2500);
+  }
+
+  function setCurrentDate() {
+    const date = new Intl.DateTimeFormat("es-CO", {
+      weekday:"long", day:"numeric", month:"long"
+    }).format(new Date());
+    document.getElementById("currentDate").textContent =
+      date.charAt(0).toUpperCase() + date.slice(1);
+  }
+
+  // Inicio limpio con los datos ficticios. Los cambios solo viven en esta sesión.
+  setCurrentDate();
+  updateDashboard();
+</script>
+</body>
+</html>
