@@ -1,6 +1,10 @@
 # Estructura y Ornamentación Valderrama
 
-Demo interactiva mobile-first para validar el flujo de órdenes de trabajo de un taller de estructuras metálicas.
+Aplicación interactiva mobile-first para gestionar las órdenes de trabajo de un taller de estructuras metálicas.
+
+## Estado inicial
+
+La aplicación inicia completamente vacía: no incluye clientes, órdenes, abonos ni gastos de ejemplo. Los indicadores comienzan en cero. Registra la primera orden desde el botón **Nueva orden**.
 
 ## Funcionalidades incluidas
 
@@ -12,20 +16,15 @@ Demo interactiva mobile-first para validar el flujo de órdenes de trabajo de un
 - Detalle de órdenes con historial de abonos y gastos.
 - Órdenes recientes en el dashboard.
 - Planeador de entregas y alertas por fecha.
-- Datos ficticios de demostración y botón para restablecerlos.
 
 ## Ejecutar localmente
 
 Abre `index.html` directamente en un navegador moderno. No requiere backend ni dependencias.
 
-La demo reinicia los datos ficticios al recargar la página. Los registros interactivos se conservan durante la sesión actual del navegador.
+**Importante:** esta versión es una demo sin persistencia. Los datos que registres estarán disponibles mientras mantengas abierta la página. Al recargarla o cerrarla, se borrarán y la aplicación volverá a iniciar vacía.
 
-## Publicar con GitHub Pages
+## Publicación
 
-1. En GitHub, abre **Settings → Pages**.
-2. En **Build and deployment**, selecciona **GitHub Actions** como fuente.
-3. El workflow del repositorio publicará el contenido de la raíz.
-4. Cuando termine el workflow, la URL de Pages aparecerá en esa misma sección.
+El repositorio se publica con GitHub Pages desde la rama `main`, carpeta `/(root)`.
 
 > Esta es una demo de validación. No es un sistema productivo: no tiene autenticación, servidor ni base de datos compartida entre dispositivos. No ingreses información financiera real o sensible.
-
