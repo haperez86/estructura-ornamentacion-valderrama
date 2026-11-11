@@ -72,6 +72,9 @@
     .toast { position:fixed;left:50%;bottom:88px;transform:translateX(-50%) translateY(20px);width:calc(100% - 40px);max-width:420px;padding:14px 18px;border-radius:14px;background:var(--dark);color:white;text-align:center;font-size:13px;opacity:0;pointer-events:none;transition:.25s ease;z-index:100; }
     .toast.show { opacity:1;transform:translateX(-50%) translateY(0); }
     .detail-actions { margin-top:20px;display:grid;gap:10px; }
+    .completion-control { display:flex;align-items:center;gap:10px;margin-top:18px;padding:14px;border-radius:13px;background:#ecfdf5;color:#047857;font-weight:750; }
+    .completion-control input { width:20px;height:20px;accent-color:#059669; }
+    .completion-control label { margin:0;cursor:pointer; }
     @media (min-width:700px) { body { padding-top:20px; } .app { min-height:calc(100vh - 20px);box-shadow:var(--shadow);border-radius:24px 24px 0 0;overflow:hidden; } }
   </style>
 </head>
@@ -106,12 +109,13 @@
         </div>
       </section>
       <section class="section">
-        <div class="section-header"><h2 class="section-title">Próximas entregas</h2><button class="section-link" onclick="showScreen('planner')">Ver planeador</button></div>
-        <div class="list" id="upcomingDeliveries"></div>
-      </section>
-      <section class="section">
         <div class="section-header"><h2 class="section-title">Órdenes recientes</h2><button class="section-link" onclick="showScreen('orders')">Ver todas</button></div>
         <div class="list" id="recentOrders"></div>
+      </section>
+      <section class="section">
+        <div class="section-header"><h2 class="section-title">Reporte del negocio</h2></div>
+        <button class="primary-button" type="button" onclick="downloadExcelReport()">📊 Descargar reporte Excel</button>
+        <div class="help">Incluye órdenes, estado de trabajos, abonos, medios de pago y gastos.</div>
       </section>
     </main>
   </section>
@@ -127,7 +131,6 @@
         <div class="form-group"><label for="orderClient">Cliente</label><input id="orderClient" type="text" placeholder="Ej: Juan Pérez" required></div>
         <div class="form-group"><label for="orderDescription">Descripción del trabajo</label><textarea id="orderDescription" placeholder="Ej: Fabricación e instalación de un portón metálico" required></textarea></div>
         <div class="form-group"><label for="orderAmount">Valor total del trabajo</label><input id="orderAmount" type="number" min="1" inputmode="numeric" placeholder="Ej: 1300000" required></div>
-        <div class="form-group"><label for="deliveryDate">Fecha estimada de entrega</label><input id="deliveryDate" type="date" required><div class="help">Esta fecha aparecerá en el planeador de entregas.</div></div>
         <button type="submit" class="primary-button">Crear orden de trabajo</button>
       </form>
     </main>
@@ -150,6 +153,7 @@
         <div class="form-group"><label for="paymentOrder">Orden de trabajo</label><select id="paymentOrder" required onchange="updatePaymentBalance()"></select></div>
         <div class="balance-info" id="paymentBalanceInfo">Saldo pendiente: $0</div>
         <div class="form-group"><label for="paymentDate">Fecha del abono</label><input id="paymentDate" type="date" required></div>
+        <div class="form-group"><label for="paymentMethod">Medio de pago</label><select id="paymentMethod" required><option value="">Selecciona el medio de pago</option><option value="Nequi">Nequi</option><option value="Daviplata">Daviplata</option><option value="Efectivo">Efectivo</option></select></div>
         <div class="form-group"><label for="paymentAmount">Valor del abono</label><input id="paymentAmount" type="number" min="1" required><div class="help">Se carga automáticamente el saldo pendiente, pero puedes modificarlo.</div></div>
         <button type="submit" class="primary-button">Registrar abono</button>
       </form>
@@ -167,22 +171,16 @@
         <button type="submit" class="danger-button">Registrar gasto</button>
       </form>
     </main>
-  </section>
-
-  <section id="planner" class="screen">
-    <header class="app-header"><button class="back-button" onclick="showScreen('home')">← Volver</button><h1 class="header-title">Planeador de entregas</h1><p class="header-subtitle">Organiza tus trabajos según su fecha de entrega.</p></header>
-    <main class="content"><section class="section"><div class="list" id="plannerList"></div></section></main>
-  </section>
-</div>
+  </section></div>
 
 <nav class="bottom-nav">
   <button class="nav-button active" data-screen="home" onclick="showScreen('home')"><span class="nav-icon">⌂</span>Inicio</button>
   <button class="nav-button" data-screen="newOrder" onclick="showScreen('newOrder')"><span class="nav-icon">＋</span>Nueva orden</button>
   <button class="nav-button" data-screen="orders" onclick="showScreen('orders')"><span class="nav-icon">☷</span>Órdenes</button>
-  <button class="nav-button" data-screen="planner" onclick="showScreen('planner')"><span class="nav-icon">📅</span>Planeador</button>
 </nav>
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
   // La aplicación comienza vacía. Los registros se crean desde la interfaz.
   let appData = { orders: [] };
@@ -195,7 +193,6 @@
     });
     updateDashboard();
     if (screenId === "orders") updateOrdersList();
-    if (screenId === "planner") updatePlanner();
     window.scrollTo({top: 0, behavior: "smooth"});
   }
 
@@ -254,24 +251,14 @@
     document.getElementById("totalExpense").textContent = formatCurrency(summary.expenses);
     document.getElementById("orderCount").textContent = summary.orders;
     updateRecentOrders();
-    updateUpcomingDeliveries();
-  }
-
-  function getDeliveryStatus(order) {
-    if (order.delivered) return {label: "✓ Entregado", className: "status-ok"};
-    const today = new Date();
-    today.setHours(0,0,0,0);
-    const delivery = new Date(order.deliveryDate + "T12:00:00");
-    const difference = Math.ceil((delivery - today) / 86400000);
-    if (difference < 0) return {label: "⚠ Entrega vencida", className: "status-overdue"};
-    if (difference <= 7) return {label: "📅 Entrega próxima", className: "status-soon"};
-    return {label: "✓ En planeación", className: "status-ok"};
   }
 
   function createOrderHTML(order) {
     const paid = getOrderPayments(order);
     const balance = getOrderBalance(order);
-    const status = getDeliveryStatus(order);
+    const completionStatus = order.delivered
+      ? '<span class="delivery-status status-ok">✓ Trabajo terminado</span>'
+      : '<span class="delivery-status status-soon">○ En proceso</span>';
     return `
       <div class="list-item" onclick="openOrderDetail(${order.id})">
         <span class="order-code">${escapeHTML(order.code)}</span>
@@ -279,12 +266,11 @@
           <div>
             <div class="item-title">${escapeHTML(order.description)}</div>
             <div class="item-detail">Cliente: ${escapeHTML(order.client)}</div>
-            <div class="item-detail">📅 Entrega: ${formatDate(order.deliveryDate)}</div>
           </div>
           <div class="item-value">${formatCurrency(order.amount)}</div>
         </div>
         <div class="item-detail">Abonos: ${formatCurrency(paid)} · Saldo: ${formatCurrency(balance)}</div>
-        <div class="delivery-status ${status.className}">${status.label}</div>
+        ${completionStatus}
       </div>`;
   }
 
@@ -314,7 +300,6 @@
       client: document.getElementById("orderClient").value.trim(),
       description: document.getElementById("orderDescription").value.trim(),
       amount: Number(document.getElementById("orderAmount").value),
-      deliveryDate: document.getElementById("deliveryDate").value,
       delivered: false,
       payments: [],
       expenses: []
@@ -370,7 +355,8 @@
     order.payments.push({
       id: Date.now(),
       date: document.getElementById("paymentDate").value,
-      amount
+      amount,
+      method: document.getElementById("paymentMethod").value
     });
     this.reset();
     updateDashboard();
@@ -411,6 +397,16 @@
     showToast("Gasto registrado correctamente ✓");
   });
 
+  function toggleOrderCompletion(orderId, completed) {
+    const order = appData.orders.find(item => item.id === orderId);
+    if (!order) return;
+    order.delivered = completed;
+    updateDashboard();
+    updateOrdersList();
+    openOrderDetail(orderId);
+    showToast(completed ? "Trabajo marcado como terminado ✓" : "Trabajo marcado como pendiente");
+  }
+
   function openOrderDetail(orderId) {
     const order = appData.orders.find(item => item.id === orderId);
     if (!order) return;
@@ -423,7 +419,7 @@
       <p class="header-subtitle">${escapeHTML(order.description)}</p>`;
     const paymentsHTML = order.payments.length
       ? order.payments.map(payment => `
-        <div class="detail-row"><span class="detail-label">${formatDate(payment.date)}</span><span class="detail-value income-color">${formatCurrency(payment.amount)}</span></div>`).join("")
+        <div class="detail-row"><span class="detail-label">${formatDate(payment.date)} · ${escapeHTML(payment.method || "No especificado")}</span><span class="detail-value income-color">${formatCurrency(payment.amount)}</span></div>`).join("")
       : `<div class="item-detail">Aún no hay abonos registrados.</div>`;
     const expensesHTML = order.expenses.length
       ? order.expenses.map(expense => `
@@ -434,61 +430,87 @@
       <div class="detail-row"><span class="detail-label">Abonos recibidos</span><span class="detail-value income-color">${formatCurrency(paid)}</span></div>
       <div class="detail-row"><span class="detail-label">Saldo por cobrar</span><span class="detail-value pending-color">${formatCurrency(balance)}</span></div>
       <div class="detail-row"><span class="detail-label">Gastos registrados</span><span class="detail-value expense-color">${formatCurrency(expenses)}</span></div>
-      <div class="detail-row"><span class="detail-label">Fecha estimada de entrega</span><span class="detail-value">${formatDate(order.deliveryDate)}</span></div>
+      <div class="completion-control"><input id="orderCompleted" type="checkbox" ${order.delivered ? "checked" : ""} onchange="toggleOrderCompletion(${order.id}, this.checked)"><label for="orderCompleted">✓ Trabajo terminado</label></div>
       <div class="history"><h3>💵 Historial de abonos</h3>${paymentsHTML}</div>
       <div class="history"><h3>💸 Gastos del trabajo</h3>${expensesHTML}</div>`;
     showScreen("orderDetail");
   }
 
-  function updateUpcomingDeliveries() {
-    const container = document.getElementById("upcomingDeliveries");
-    const orders = [...appData.orders]
-      .filter(order => !order.delivered)
-      .sort((a,b) => new Date(a.deliveryDate)-new Date(b.deliveryDate))
-      .slice(0,3);
-    if (!orders.length) {
-      container.innerHTML = `<div class="empty-state"><div class="empty-icon">📅</div><h3>No hay entregas pendientes</h3><p>Las próximas fechas aparecerán aquí.</p></div>`;
+  function downloadExcelReport() {
+    if (typeof XLSX === "undefined") {
+      showToast("No fue posible cargar el módulo de Excel. Revisa tu conexión.");
       return;
     }
-    container.innerHTML = orders.map(order => {
-      const status = getDeliveryStatus(order);
-      return `
-        <div class="list-item" onclick="openOrderDetail(${order.id})">
-          <span class="order-code">${escapeHTML(order.code)}</span>
-          <div class="list-row">
-            <div>
-              <div class="item-title">${escapeHTML(order.client)}</div>
-              <div class="item-detail">📅 Entrega: ${formatDate(order.deliveryDate)}</div>
-              <div class="item-detail">${escapeHTML(order.description)}</div>
-            </div>
-            <div class="delivery-status ${status.className}">${status.label}</div>
-          </div>
-        </div>`;
-    }).join("");
-  }
 
-  function updatePlanner() {
-    const container = document.getElementById("plannerList");
-    const orders = [...appData.orders].sort((a,b) => new Date(a.deliveryDate)-new Date(b.deliveryDate));
-    if (!orders.length) {
-      container.innerHTML = `<div class="empty-state"><div class="empty-icon">📅</div><h3>No hay trabajos programados</h3><p>Agrega una fecha de entrega a una nueva orden.</p></div>`;
-      return;
-    }
-    container.innerHTML = orders.map(order => {
-      const status = getDeliveryStatus(order);
-      return `
-        <div class="list-item" onclick="openOrderDetail(${order.id})">
-          <span class="order-code">${escapeHTML(order.code)}</span>
-          <div class="list-row">
-            <div>
-              <div class="item-title">${escapeHTML(order.client)}</div>
-              <div class="item-detail">${escapeHTML(order.description)}</div>
-              <div class="item-detail">📅 ${formatDate(order.deliveryDate)}</div>
-            </div>
-            <div class="delivery-status ${status.className}">${status.label}</div>
-          </div>
-        </div>`;
-    }).join("");
+    const summary = getSummary();
+    const paidTotal = appData.orders.reduce((total, order) => total + getOrderPayments(order), 0);
+    const completedCount = appData.orders.filter(order => order.delivered).length;
+    const ordersRows = appData.orders.map(order => ({
+      "Orden": order.code,
+      "Cliente": order.client,
+      "Trabajo": order.description,
+      "Valor del trabajo": order.amount,
+      "Total abonos": getOrderPayments(order),
+      "Saldo por cobrar": getOrderBalance(order),
+      "Total gastos": getOrderExpenses(order),
+      "Estado": order.delivered ? "Terminado" : "En proceso"
+    }));
+    const paymentsRows = appData.orders.flatMap(order => order.payments.map(payment => ({
+      "Orden": order.code,
+      "Cliente": order.client,
+      "Fecha": payment.date,
+      "Medio de pago": payment.method || "No especificado",
+      "Valor del abono": payment.amount
+    })));
+    const expensesRows = appData.orders.flatMap(order => order.expenses.map(expense => ({
+      "Orden": order.code,
+      "Cliente": order.client,
+      "Categoría": expense.category,
+      "Descripción": expense.description,
+      "Valor del gasto": expense.amount
+    })));
+
+    const workbook = XLSX.utils.book_new();
+    const summaryRows = [
+      { "Indicador": "Fecha del reporte", "Valor": new Date().toLocaleDateString("es-CO") },
+      { "Indicador": "Cantidad de órdenes", "Valor": appData.orders.length },
+      { "Indicador": "Trabajos terminados", "Valor": completedCount },
+      { "Indicador": "Trabajos en proceso", "Valor": appData.orders.length - completedCount },
+      { "Indicador": "Valor total de trabajos", "Valor": summary.workValue },
+      { "Indicador": "Total de abonos recibidos", "Valor": paidTotal },
+      { "Indicador": "Saldo por cobrar", "Valor": summary.pending },
+      { "Indicador": "Total de gastos", "Valor": summary.expenses },
+      { "Indicador": "Utilidad estimada", "Valor": summary.profit }
+    ];
+
+    const addSheet = (name, rows, headers) => {
+      const sheet = XLSX.utils.json_to_sheet(rows, headers ? {header: headers} : undefined);
+      XLSX.utils.book_append_sheet(workbook, sheet, name);
+      return sheet;
+    };
+
+    const summarySheet = addSheet("Resumen", summaryRows);
+    summarySheet["!cols"] = [{wch:30},{wch:22}];
+
+    const ordersSheet = addSheet("Ordenes", ordersRows, [
+      "Orden", "Cliente", "Trabajo", "Valor del trabajo", "Total abonos",
+      "Saldo por cobrar", "Total gastos", "Estado"
+    ]);
+    ordersSheet["!cols"] = [{wch:12},{wch:24},{wch:42},{wch:20},{wch:18},{wch:18},{wch:18},{wch:16}];
+
+    const paymentsSheet = addSheet("Abonos", paymentsRows, [
+      "Orden", "Cliente", "Fecha", "Medio de pago", "Valor del abono"
+    ]);
+    paymentsSheet["!cols"] = [{wch:12},{wch:24},{wch:16},{wch:18},{wch:20}];
+
+    const expensesSheet = addSheet("Gastos", expensesRows, [
+      "Orden", "Cliente", "Categoría", "Descripción", "Valor del gasto"
+    ]);
+    expensesSheet["!cols"] = [{wch:12},{wch:24},{wch:18},{wch:42},{wch:20}];
+
+    const dateSuffix = new Date().toISOString().slice(0,10);
+    XLSX.writeFile(workbook, "reporte-taller-" + dateSuffix + ".xlsx");
+    showToast("Reporte Excel descargado correctamente ✓");
   }
 
   function showToast(message) {
